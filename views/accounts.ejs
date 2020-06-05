@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounts</title>
+</head>
+<body>
+    <table class="table m-4">
+        <thead>
+          <tr  class="row">
+            <th class="col-md-1">#</th>
+            <th class="col-md-2">Login</th>
+            <th class="col-md-2">Email</th>
+            <th class="col-md-1">Surname</th>
+            <th class="col-md-0"></th>
+            <th class="col-md-1"></th>
+          </tr>
+        </thead>
+        <tbody>
+        <% if(accounts.length !== 0) { %>
+          <% for(let i = 0; i < accounts.length; i++) { %>
+            <tr class="row">
+                <th class="col-md-1"><%= i %></th>
+                <td class="col-md-2"><%= accounts[i].login %></td>
+                <td class="col-md-2"><%= accounts[i].email %></td>
+                <td class="col-md-1"><%= accounts[i].surname %></td>
+                <td class="col-md-0"><button type="button"  data-toggle="modal" class="btn" data-target="#updateModal" id=<%=accounts[i].id%>  onclick="getId(this.id)">
+                    <span aria-hidden="true">Edit</span>
+                  </button>
+                </td>
+                <td class="col-md-1"><button type="button" class="close" aria-label="Close" id=<%=accounts[i].id%> onclick="deleteAccount(this.id)">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </td>
+            </tr>
+          <% }} %>
+        </tbody>
+      </table>
+      <button type="button" class="btn btn-primary m-4" data-toggle="modal" data-target="#exampleModal" >
+        Add account
+      </button>
+      <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Update account</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                      <label for="name" class="col-form-label">Login</label>
+                      <input type="text" class="form-control" id="loginUpdate">
+                    </div>
+                    <div class="form-group">
+                        <label for="name" class="col-form-label">Email</label>
+                        <input type="text" class="form-control" id="emailUpdate">
+                        <p class="mt-1" id="sameEmailUpdate" style="color: #fc333f;"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="name" class="col-form-label">Surname</label>
+                        <input type="text" class="form-control" id="surnameUpdate">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary"  id="updateAccount">Update</button>
+            </div>
+          </div>
+        </div>
+      </div>  
+      <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Account</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                      <label for="name" class="col-form-label">Login</label>
+                      <input type="text" class="form-control" id="login">
+                    </div>
+                    <div class="form-group">
+                        <label for="name" class="col-form-label">Email</label>
+                        <input type="text" class="form-control" id="email">
+                        <p class="mt-1" id="sameEmail" style="color: #fc333f;"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="name" class="col-form-label">Surname</label>
+                        <input type="text" class="form-control" id="surname">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary"  id="saveAccount">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script id="worker1" type="javascript/worker">
+        // Rest of your worker code goes here.
+      </script>
+      <script> 
+        const save = document.getElementById('saveAccount');
+        const update = document.getElementById('updateAccount');
+        update.addEventListener('click', updateData, false);
+        save.addEventListener('click', saveData, false);
+        async function deleteAccount(id) {
+            try {
+            
+              const response = await fetch(`/accounts`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({id})
+                });
+                if (!response.ok) {
+                    const json = await response.json();
+                    console.log(json.message);
+                    
+                }
+                window.location.href = "/accounts";
+
+            } catch (error) {
+            console.log(error);
+            
+            }
+        }
+
+        let id;
+        function getId(val) {
+            id = val;
+        }
+
+        async function updateData (e) {
+            
+            
+        e.preventDefault();
+            console.log(e);
+        const login = document.getElementById("loginUpdate").value;
+        const email = document.getElementById("emailUpdate").value;
+        const surname = document.getElementById("surnameUpdate").value;
+        const accounts = {
+            id,
+            login,
+            email,
+            surname
+        }
+        
+        
+        try {
+            const response = await fetch('/accounts', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(accounts)
+            });
+            if (!response.ok) {
+                const json = await response.json();
+                console.log(json);
+                const primeContainer = document.getElementById("sameEmailUpdate");
+                primeContainer.innerHTML = json.message;
+                
+            } else {
+              window.location.href = "/accounts";
+            }
+
+        } catch (error) {
+            console.log(error);
+            
+        }
+        
+
+    }
+
+    async function saveData (e) {
+        e.preventDefault();
+
+        const login = document.getElementById("login").value;
+        const email = document.getElementById("email").value;
+        const surname = document.getElementById("surname").value;
+        
+        const accounts = {
+            login,
+            email,
+            surname
+        }
+        console.log(accounts);
+        
+        
+        try {
+            const response = await fetch('/accounts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(accounts)
+            });
+            console.log(response.ok);
+            
+            if (!response.ok) {
+                const json = await response.json();
+                console.log(json.message);
+                const primeContainer = document.getElementById("sameEmail");
+                primeContainer.innerHTML = json.message;
+                
+            } else {
+              window.location.href = "/accounts";
+            }
+            
+        } catch (error) {
+            console.log(error);
+            
+        }
+        
+
+    }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
